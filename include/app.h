@@ -24,9 +24,13 @@ typedef struct {
     char * password;
     char * host;
     char * url_path;
-} connection_params;
+} connection_parameters;
 
-void print_connection_params();
+int check_parameters(char * url);
+
+int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path);
+
+void print_connection_parameters();
 
 int open_connection(char *adress, int port);
 
