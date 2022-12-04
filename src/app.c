@@ -2,22 +2,43 @@
 
 connection_parameters parameters;
 
-int check_and_initialize(char * url){
+int check_parameters(char * url){
 
-    if(strstr(url,"ftp://") != url) return -1;
+    if(strstr(url,"ftp://") != url) 
+        return -1;
 
     char * user = NULL;
     char * password = NULL;
     char * hostname = NULL;
     char * url_path = NULL;
 
-    // parse url
+    char * no_header = url + 6;  // exclude ftp header
+
+    unsigned int url_size = strlen(no_header); // needed before strtok 
+
+    char * host = strtok(no_header, "/");
+
+    if (strlen(host) == url_size){
+        url_path = malloc(1);
+        url_path = "";
+
+    } else url_path = no_header + strlen(host) + 1;
+
+    if(strstr(host, "@") != NULL) {
+
+        char * auth = strtok(host, "@");
+        hostname = strtok(NULL, "@");
+
+        user = strtok(auth, ":");
+        password = strtok(NULL, ":");
+
+    } else hostname = host;
 
     return initialize_connection_parameters(user, password, hostname, url_path);
 }
 
 int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path){
-    if(hostname == NULL || url_path == NULL) return -1;
+    if(host == NULL || url_path == NULL) return -1;
 
     if((user == NULL && password != NULL) ||(user != NULL && password == NULL)) return -1;
 
@@ -39,7 +60,7 @@ int initialize_connection_parameters(const char * user, const char * password, c
 
     struct hostent *h;
 
-    if ((h = gethostbyname(hostname)) == NULL) {
+    if ((h = gethostbyname(host)) == NULL) {
         printf("gethostbyname() failed");
         return -1;
     }
@@ -97,7 +118,7 @@ int app(){
     /*int result = login(sockfd);
 
     if (result == 1)
-        download_file(sockfd);
+        download(sockfd);
     */
     if (close(sockfd)<0) {
         perror("close()");
