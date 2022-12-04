@@ -79,9 +79,9 @@ int initialize_connection_parameters(const char * user, const char * password, c
 void print_connection_parameters(){ 
     
     if(strcmp(parameters.user, "anonymous") != 0)
-        printf("FTP CONNECTION - user:%s; password:%s; host:%s; url_path:%s\n", parameters.user, parameters.password, parameters.host, parameters.url_path);
+        printf("FTP CONNECTION \n\t- user:%s\n\t- password:%s\n\t- host:%s\n\t- url_path:%s\n", parameters.user, parameters.password, parameters.host, parameters.url_path);
     else 
-        printf("FTP CONNECTION - user:anonymous; host:%s; url_path:%s\n", parameters.host, parameters.url_path);
+        printf("FTP CONNECTION \n\t- user:anonymous\n\t- host:%s\n\t- url_path:%s\n", parameters.host, parameters.url_path);
 
 }
 
@@ -111,15 +111,65 @@ int open_connection(char *adress, int port){
     return sockfd;
 }
 
+int get_response_code(FILE* file){
+    char *line = malloc(MAX_LINE_SIZE);
+    int code = -1;
+    size_t n;
+    
+    while (getline(&line, &n, file) != -1) {
+        printf("%s\n",line);
+        if (line[3] == ' ') {
+            code = atoi(line); // integer value of string = response code
+            break;
+        }
+    }
+
+    free(line);
+
+    return code;
+}
+
+int login (int fd){
+    FILE *file = fdopen(fd, "r");
+
+    char message[MAX_LINE_SIZE];
+    int res = -1;
+
+    while(res != LOGGED_IN){
+        res = get_response_code(file);
+        switch(res){
+            case READY_USER:
+                sprintf(message, "user %s\n", parameters.user);
+                break;
+            case USER_OK_PASSWORD:
+                sprintf(message, "pass %s\n", parameters.password);
+                break;
+            case LOGGED_IN:
+                sprintf(message, "pasv\n");
+                break;
+            default:
+                return -1;
+        }
+
+        printf("%s\n", message);
+        write(fd, message, strlen(message));
+    }
+
+    return res;
+
+}
+
 int app(){
 
     int sockfd = open_connection(parameters.host, FTP_CTRL);
 
-    /*int result = login(sockfd);
 
-    if (result == 1)
-        download(sockfd);
-    */
+    if (login(sockfd) == LOGGED_IN){
+        printf("DEBUG - successfully logged in and set passive mode\n");
+        //download(sockfd);
+    }
+
+
     if (close(sockfd)<0) {
         perror("close()");
         exit(-1);

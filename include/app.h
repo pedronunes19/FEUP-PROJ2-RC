@@ -34,6 +34,8 @@ void print_connection_parameters();
 
 int open_connection(char *adress, int port);
 
+int get_response_code(FILE* file);
+
 int login(int fd);
 
 int download(int fd);
