@@ -38,9 +38,11 @@ int check_parameters(char * url){
 }
 
 int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path){
-    if(host == NULL || url_path == NULL) return -1;
+    if(host == NULL || url_path == NULL) 
+        return -1;
 
-    if((user == NULL && password != NULL) ||(user != NULL && password == NULL)) return -1;
+    if((user == NULL && password != NULL) ||(user != NULL && password == NULL)) 
+        return -1;
 
     if(user != NULL) {
 
@@ -79,9 +81,9 @@ int initialize_connection_parameters(const char * user, const char * password, c
 void print_connection_parameters(){ 
     
     if(strcmp(parameters.user, "anonymous") != 0)
-        printf("FTP CONNECTION \n\t- user:%s\n\t- password:%s\n\t- host:%s\n\t- url_path:%s\n", parameters.user, parameters.password, parameters.host, parameters.url_path);
+        printf("FTP CONNECTION \n- user:%s\n- password:%s\n- host:%s\n- url_path:%s\n", parameters.user, parameters.password, parameters.host, parameters.url_path);
     else 
-        printf("FTP CONNECTION \n\t- user:anonymous\n\t- host:%s\n\t- url_path:%s\n", parameters.host, parameters.url_path);
+        printf("FTP CONNECTION \n- user:anonymous\n- host:%s\n- url_path:%s\n", parameters.host, parameters.url_path);
 
 }
 
