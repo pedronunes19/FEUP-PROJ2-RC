@@ -8,16 +8,19 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
+#include <libgen.h>
+
 
 #define FTP_CTRL 21
-#define MAX_LINE_SIZE 256
+#define MAX_MSG_SIZE 256
 
 #define OPEN_CONNECTION 150
 #define READY_USER 220
-#define FILE_ACTION_SUCCESS 226
+#define TRANFER_COMPLETE 226
 #define PASSIVE_MODE 227
 #define LOGGED_IN 230
-#define USER_OK_PASSWORD 331
+#define READY_PASSWORD 331
 
 typedef struct {
     char * user;
@@ -29,8 +32,6 @@ typedef struct {
 int check_parameters(char * url);
 
 int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path);
-
-void print_connection_parameters();
 
 int open_connection(char *adress, int port);
 

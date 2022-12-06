@@ -78,15 +78,6 @@ int initialize_connection_parameters(const char * user, const char * password, c
 
 }
 
-void print_connection_parameters(){ 
-    
-    if(strcmp(parameters.user, "anonymous") != 0)
-        printf("FTP CONNECTION \n- user:%s\n- password:%s\n- host:%s\n- url_path:%s\n", parameters.user, parameters.password, parameters.host, parameters.url_path);
-    else 
-        printf("FTP CONNECTION \n- user:anonymous\n- host:%s\n- url_path:%s\n", parameters.host, parameters.url_path);
-
-}
-
 int open_connection(char *adress, int port){
     int sockfd;
     struct sockaddr_in server_addr;
@@ -114,7 +105,7 @@ int open_connection(char *adress, int port){
 }
 
 int get_response_code(FILE* file){
-    char *line = malloc(MAX_LINE_SIZE);
+    char *line = malloc(MAX_MSG_SIZE);
     int code = -1;
     size_t n;
     
@@ -134,7 +125,7 @@ int get_response_code(FILE* file){
 int login (int fd){
     FILE *file = fdopen(fd, "r");
 
-    char message[MAX_LINE_SIZE];
+    char message[MAX_MSG_SIZE];
     int res = -1;
 
     while(res != LOGGED_IN){
@@ -143,7 +134,7 @@ int login (int fd){
             case READY_USER:
                 sprintf(message, "user %s\n", parameters.user);
                 break;
-            case USER_OK_PASSWORD:
+            case READY_PASSWORD:
                 sprintf(message, "pass %s\n", parameters.password);
                 break;
             case LOGGED_IN:
@@ -161,14 +152,59 @@ int login (int fd){
 
 }
 
+int download(int fd){
+    FILE *file = fdopen(fd, "r");
+    char *line = malloc(MAX_MSG_SIZE);
+    size_t n;
+
+    getline(&line, &n, file);
+    if (atoi(line) != PASSIVE_MODE)
+        return -1;
+
+    printf("%s\n", line);
+
+    int address[4];
+    int port[2];
+    sscanf(line, "227 Entering Passive Mode (%d, %d, %d, %d, %d, %d).\n", &address[0], &address[1], &address[2], &address[3], &port[0], &port[1]);
+
+    free(line);
+
+    char address_str[16];
+    sprintf(address_str, "%d.%d.%d.%d", address[0], address[1], address[2], address[3]);
+    int port_number = 256*port[0] + port[1];
+
+    int download_fd = open_connection(address_str, port_number);
+
+    char message[MAX_MSG_SIZE];
+    sprintf(message, "retr %s\n", parameters.url_path);
+    write(fd, message, strlen(message));
+
+    if (get_response_code(file) != OPEN_CONNECTION)
+        return -1;    
+
+    char *filename = basename(parameters.url_path);    
+
+    int file_fd = open(filename, O_WRONLY | O_CREAT, 0666);
+
+    char download_byte[1];
+
+    while(read(download_fd, download_byte, 1) != 0)
+        write(file_fd, download_byte, 1);
+
+    if(get_response_code(file) != TRANFER_COMPLETE)
+        return -1;
+    
+    return 0;
+
+}
+
 int app(){
 
     int sockfd = open_connection(parameters.host, FTP_CTRL);
 
 
     if (login(sockfd) == LOGGED_IN){
-        printf("DEBUG - successfully logged in and set passive mode\n");
-        //download(sockfd);
+        download(sockfd);
     }
 
 

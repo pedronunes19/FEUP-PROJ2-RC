@@ -13,8 +13,6 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    print_connection_parameters();
-
     app();
 
     return 0;
