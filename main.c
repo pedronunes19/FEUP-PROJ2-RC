@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    if (check_parameters(argv[1]) != 0){
+    if (parse_url(argv[1]) != 0){
         printf("Invalid parameters\n");
         printf("Usage:\tdownload ftp://[<user>:<password>@]<host>/<url-path>\n");
         return -1;

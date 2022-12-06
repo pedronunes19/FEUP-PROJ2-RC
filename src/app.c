@@ -2,7 +2,7 @@
 
 connection_parameters parameters;
 
-int check_parameters(char * url){
+int parse_url(char * url){
 
     if(strstr(url,"ftp://") != url) 
         return -1;
@@ -34,16 +34,16 @@ int check_parameters(char * url){
 
     } else hostname = host;
 
-    return initialize_connection_parameters(user, password, hostname, url_path);
-}
-
-int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path){
-    if(host == NULL || url_path == NULL) 
+    if(hostname == NULL || url_path == NULL) 
         return -1;
 
     if((user == NULL && password != NULL) ||(user != NULL && password == NULL)) 
         return -1;
 
+    return initialize_connection_parameters(user, password, hostname, url_path);
+}
+
+int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path){
     if(user != NULL) {
 
         parameters.user = (char*) malloc(strlen(user) * sizeof(char));

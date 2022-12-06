@@ -29,7 +29,7 @@ typedef struct {
     char * url_path;
 } connection_parameters;
 
-int check_parameters(char * url);
+int parse_url(char * url);
 
 int initialize_connection_parameters(const char * user, const char * password, const char * host, const char * url_path);
 
