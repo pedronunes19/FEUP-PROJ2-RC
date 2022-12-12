@@ -186,10 +186,11 @@ int download(int fd){
 
     int file_fd = open(filename, O_WRONLY | O_CREAT, 0666);
 
-    char download_byte[1];
+    char download_bytes[256];
+    int bytes;
 
-    while(read(download_fd, download_byte, 1) != 0)
-        write(file_fd, download_byte, 1);
+    while((bytes = read(download_fd, download_bytes, 256)) != 0)
+        write(file_fd, download_bytes, bytes);
 
     if(get_response_code(file) != TRANFER_COMPLETE)
         return -1;
