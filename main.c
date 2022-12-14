@@ -13,7 +13,5 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    app();
-
-    return 0;
+    return app();
 }

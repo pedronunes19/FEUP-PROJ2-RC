@@ -194,6 +194,11 @@ int download(int fd){
 
     if(get_response_code(file) != TRANFER_COMPLETE)
         return -1;
+
+    if (close(download_fd)<0) {
+        perror("close()");
+        return -1;
+    }    
     
     return 0;
 
@@ -211,7 +216,7 @@ int app(){
 
     if (close(sockfd)<0) {
         perror("close()");
-        exit(-1);
+        return -1;
     }
 
     return 0;
